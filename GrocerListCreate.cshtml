@@ -1,0 +1,51 @@
+﻿@{
+     var db = Database.Open("Knapsack") ;
+    
+    var selectCommand = "SELECT * FROM ItemList";
+    var searchTerm = "";
+
+   if(!Request.QueryString["searchItem"].IsEmpty() ) {
+        selectCommand = "SELECT * FROM ItemList WHERE Name LIKE @0";
+        searchTerm = "%" + Request["searchItem"] + "%";
+    }
+
+    var selectedData = db.Query(selectCommand, searchTerm);
+    var grid = new WebGrid(source: selectedData, rowsPerPage:30);
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Knapsack</title>
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <style type="text/css">
+          .grid { margin: 4px; border-collapse: collapse; width: 600px; }
+          .grid th, .grid td { border: 1px solid #C0C0C0; padding: 5px; }
+          .head { background-color: #E8E8E8; font-weight: bold; color: #FFF; }
+          .alt { background-color: #E8E8E8; color: #000; }
+        </style>      
+    </head>
+    <body>
+        <form method="get">
+          <div>
+            <label for="searchItem">Item to look for:</label>
+            <input type="text" name="searchItem" value="@Request.QueryString["searchItem"]" />
+            <input type="Submit" value="Search" /><br/>
+            (Leave blank to list all Items.)<br/>
+            </div>
+        </form>
+        <div>
+         @grid.GetHtml(
+            tableStyle: "grid",
+            headerStyle: "head",
+            alternatingRowStyle: "alt",
+            columns: grid.Columns(
+            grid.Column("Name"),
+            grid.Column("Cost")
+        )
+        )
+         </div>
+    </body>
+</html>
